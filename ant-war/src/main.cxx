@@ -21,9 +21,9 @@
 
 int const WIDTH = 800;
 int const HEIGHT = 600;
-float const PI = 3.1415927; // TODO: better PI   
+double const PI = 3.1415927; // TODO: better PI   
 int nb_birds = 15;
-float deltaT = 0.1;
+double deltaT = 0.1;
 const float COHESION_FACTOR = 0.01f;
 const float SEPARATION_FACTOR = 0.05f;
 const float ALIGNMENT_FACTOR = 0.05f;
@@ -87,8 +87,8 @@ struct BirdsStack {
 		top += 1;
 	};
 
-	T* pop() {
-		T* s = tab[top];
+	N* pop() {
+		N* s = tab[top];
 		tab[top] = 0; // pointeur nul 
 		top -= 1;
 		return s;
@@ -124,10 +124,10 @@ struct BirdsStack {
 };
 
 
-class Object {
+struct Object {
 	virtual void draw(SDL_Renderer* renderer) const = 0;
 	virtual ~Object() = default;
-	virtual void update();
+	virtual void update() = 0;
 };
 
 struct Bird : public Object {
@@ -220,23 +220,32 @@ struct global_t {
 global_t g;
 // TO DO peindre un oiseau 
 //TO DO peindre nuée d'oiseau 
-void paint_it_s_work(int ox, int oy, int scale = 20) {
+//void paint_it_s_work(int ox, int oy, int scale = 20) {
+//	SDL_SetRenderDrawColor(g.renderer, 0u, 0u, 0u, SDL_ALPHA_OPAQUE);   //def la couleur des rectangles à peindre 
+//	for (int j = 0; j < px::height; ++j) {
+//		for (int i = 0; i < px::width; ++i) {   //parcours les rectangles 
+//			if (px::header_data[j*px::width+i] == 0) {     // dans GIMP grande matrice avec des O et des 1 pour savoir si colorié
+//				SDL_Rect r = { i*scale+ox, j*scale+oy, 20, 20 }; //20 et 20 taille des cotés du rectangle et leur position au début
+//				SDL_RenderFillRect(g.renderer, &r); //dessine un rectangle
+//			}
+//		}
+//	}
+//}
+
+void paint_bird(std::vector<std::shared_ptr<Bird>>& flock) {
 	SDL_SetRenderDrawColor(g.renderer, 0u, 0u, 0u, SDL_ALPHA_OPAQUE);   //def la couleur des rectangles à peindre 
-	for (int j = 0; j < px::height; ++j) {
-		for (int i = 0; i < px::width; ++i) {   //parcours les rectangles 
-			if (px::header_data[j*px::width+i] == 0) {     // dans GIMP grande matrice avec des O et des 1 pour savoir si colorié
-				SDL_Rect r = { i*scale+ox, j*scale+oy, 20, 20 }; //20 et 20 taille des cotés du rectangle et leur position au début
+	for (const auto& other : flock) {
+				SDL_Rect r = {other->position.x, other->position.y, 5, 5 }; //20 et 20 taille des cotés du rectangle et leur position au début
 				SDL_RenderFillRect(g.renderer, &r); //dessine un rectangle
 			}
-		}
 	}
-}
 
-void do_render() { //peint une fenêtre blanche avec le clear 
+
+void do_render(std::vector<std::shared_ptr<Bird>>& flock) { //peint une fenêtre blanche avec le clear 
 	SDL_SetRenderDrawColor(g.renderer, 255u, 255u, 255u, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(g.renderer);
 
-	paint_it_s_work(0, 0, 20); //appel de la fonction pour peindre 
+	//paint_bird(flock); //appel de la fonction pour peindre 
 
 	SDL_RenderPresent(g.renderer);
 }
@@ -365,7 +374,7 @@ int main(int argc, char ** argv)
 			}
 
 			do_update(birdflock);
-			do_render();
+			do_render(birdflock);
 		}
 	}
 
