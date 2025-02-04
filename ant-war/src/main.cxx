@@ -21,7 +21,7 @@
 
 int const WIDTH = 800;
 int const HEIGHT = 600;
-double const PI = 3.1415927; // TODO: better PI   
+double const PI = 3.1415927;  
 int nb_birds = 15;
 double deltaT = 0.1;
 const float COHESION_FACTOR = 0.01f;
@@ -76,7 +76,7 @@ struct Vec2 {
 
 };
 
-template<typename N>
+/*template<typename N>   //j'étais partis sur une stack d'oiseaux mais j'ai finalement opté pour un vecteur 
 struct BirdsStack {
 	int size;
 	int top;
@@ -122,7 +122,7 @@ struct BirdsStack {
 	// à la main , aléatoirement, rangé les uns à coté des autres
 
 };
-
+*/
 
 struct Object {
 	virtual void draw(SDL_Renderer* renderer) const = 0;
@@ -180,7 +180,19 @@ struct Bird : public Object {
 			}
 
 		}
+
+		try {
+			if (closebird == 0) {
+				throw std::invalid_argument("Division par zéro !");
+
+			}
+		}
+		catch (const std::invalid_argument& e) {
+			separation = { 0,0 };
+		}
+
 		separation *= (1 / closebird);
+		
 
 		//regle d'alignement
 		alignment = centrevitesse(flock);
@@ -218,24 +230,11 @@ struct global_t {
 };
 
 global_t g;
-// TO DO peindre un oiseau 
-//TO DO peindre nuée d'oiseau 
-//void paint_it_s_work(int ox, int oy, int scale = 20) {
-//	SDL_SetRenderDrawColor(g.renderer, 0u, 0u, 0u, SDL_ALPHA_OPAQUE);   //def la couleur des rectangles à peindre 
-//	for (int j = 0; j < px::height; ++j) {
-//		for (int i = 0; i < px::width; ++i) {   //parcours les rectangles 
-//			if (px::header_data[j*px::width+i] == 0) {     // dans GIMP grande matrice avec des O et des 1 pour savoir si colorié
-//				SDL_Rect r = { i*scale+ox, j*scale+oy, 20, 20 }; //20 et 20 taille des cotés du rectangle et leur position au début
-//				SDL_RenderFillRect(g.renderer, &r); //dessine un rectangle
-//			}
-//		}
-//	}
-//}
 
 void paint_bird(std::vector<std::shared_ptr<Bird>>& flock) {
 	SDL_SetRenderDrawColor(g.renderer, 0u, 0u, 0u, SDL_ALPHA_OPAQUE);   //def la couleur des rectangles à peindre 
 	for (const auto& other : flock) {
-				SDL_Rect r = {other->position.x, other->position.y, 5, 5 }; //20 et 20 taille des cotés du rectangle et leur position au début
+				SDL_Rect r = {other->position.x, other->position.y, 5, 5 }; //5 et 5 taille des cotés du rectangle et leur position au début
 				SDL_RenderFillRect(g.renderer, &r); //dessine un rectangle
 			}
 	}
@@ -245,12 +244,12 @@ void do_render(std::vector<std::shared_ptr<Bird>>& flock) { //peint une fenêtre 
 	SDL_SetRenderDrawColor(g.renderer, 255u, 255u, 255u, SDL_ALPHA_OPAQUE);
 	SDL_RenderClear(g.renderer);
 
-	//paint_bird(flock); //appel de la fonction pour peindre 
+	paint_bird(flock); //appel de la fonction pour peindre 
 
 	SDL_RenderPresent(g.renderer);
 }
-//TO DO modifier les positions oiseaux à peindre et leur direction en fonction des calculs 
-//TO DO éléments intéractifs (en dernier) 
+
+
 
 
 
@@ -273,7 +272,7 @@ void do_update(std::vector<std::shared_ptr<Bird>> flock) {
 	for (auto& bird : flock) {
 		bird->update(flock);
 	}
-	/*
+	/*  toujours l'ancienne implémentation avec une stack qui a été abandonnée
 	Vec2 cohesion;
 	Vec2 separation;
 	Vec2 alignement;
@@ -294,7 +293,7 @@ void do_update(std::vector<std::shared_ptr<Bird>> flock) {
 		//regle d'alignement
 		alignement = centrevitesse(birdsstack);
 
-		// TO DO pondération 
+	
 
 		//on édite les positions et les vitesses avec les vecteurs calculés 
 		birdsstack[i].vitesse = (alignement + separation + cohesion) / 3;
